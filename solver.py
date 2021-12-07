@@ -100,11 +100,12 @@ def solve(igloos):
             igloo_id = dl_asc_keys[i]
             igloo_dl = iglooList[igloo_id][1]
             igloo_dur = iglooList[igloo_id][2]
-            igloo_prof = iglooList[igloo_id][2]
+            igloo_prof = iglooList[igloo_id][3]
             latest_dl = min(t, iglooList[igloo_id][1]) - iglooList[igloo_id][2]
             if (latest_dl < 0):
                 B[i][t] = B[i-1][t]
             else:
+                #print("diff between prev and curr", B[i-1][t] - (igloo_prof + B[i-1][latest_dl]))
                 B[i][t] = max(B[i-1][t], igloo_prof + B[i-1][latest_dl])
 
     def print_opt(i, t):
