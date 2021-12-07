@@ -198,20 +198,6 @@ def solve(igloos):
 #     return soln
 
 
-
-
-    """maiden
-    time, profit = 0, 0
-    highestRatios, iglooList = [], []
-    for igloo in tasks:
-        ratio = igloo.get_max_benefit() / igloo.get_duration()
-        highestRatios.append("{:.2f}".format(ratio))
-        iglooList.append(igloo.task_id)
-    highestRatios.sort(reverse=True)
-    print(highestRatios)
-    return iglooList"""
-
-
 if __name__ == '__main__':
     """for size in os.listdir('inputs/'):
         if size not in ['small', 'medium', 'large']:
@@ -233,19 +219,4 @@ if __name__ == '__main__':
     write_output_file(output_path, output)
     print(output)
     # print(output)
-
-# Here's an example of how to run your solver.
-# if __name__ == '__main__':
-#     for size in os.listdir('inputs/'):
-#         if size not in ['small', 'medium', 'large']:
-#             continue
-#         for input_file in os.listdir('inputs/{}/'.format(size)):
-#             if size not in input_file:
-#                 continue
-#             input_path = 'inputs/{}/{}'.format(size, input_file)
-#             output_path = 'outputs/{}/{}.out'.format(size, input_file[:-3])
-#             print(input_path, output_path)
-#             tasks = read_input_file(input_path)
-#             output = solve(tasks)
-#             write_output_file(output_path, output)
 
