@@ -90,79 +90,111 @@ def solve(igloos):
 
     #f(1, 0)
     #print(soln)
-    return max_profit(1, 1440, dl_asc_keys, avgProfit)
+    max_deadline = 1440
+    num_tasks = len(tasks)
+    B = [[0 for t in range(max_deadline+1)] for i in range(0, num_tasks)]
 
-def max_profit(i, t, dl_asc_keys, avg_prof_min): #igloo index, time t, lst where keys are ids associated w/deadlines in asc order
-    #initalize an lst of taskdata items
-    tdata_lst = []
-    #placeholder task for task0
-    tdata_lst.append(Taskdata(0, 0, 0, 0, 0))
-    for task in tasks:
-        for min in range(1440):
-            tdata = Taskdata(task.get_task_id(), task.get_deadline(),
-                             task.get_duration(), task.get_max_benefit(),
-                             min) #initalize a taskdata object for each task associated with each minute
-            tdata_lst.append(tdata)
-        #tdata_lst[0].set_profit(10)
-    soln = []
-    def max_profit_helper(ind, time):
-        id = dl_asc_keys[ind] #id of the igloo we want to process
-        task_calc_profit = get_task_calc_profit(id, time)
-        task_dur = get_task_dur(id, time)
-        task_dl = get_task_dl(id, time)
-        task_profit = get_task_profit(id, time)
-        # print("dur is", task_dur)
-        if task_calc_profit != 0: #memoized values are returned
-            return task_calc_profit
-        if (time + task_dur < task_dl):
-            if (task_profit / task_dur >= 0.5 * avg_prof_min): #greedy takes any task whose prof/min is greater than avg scaled
-                soln.append(id)
-                # print(soln)
-                prev_profit = get_task_calc_profit(i - 1, time)
-                set_task_calc_profit(id, time + task_dur, prev_profit + task_profit)
-                if (ind + 1 < len(dl_asc_keys)):
-                    max_profit_helper(ind + 1, time + task_dur)
-                # if (ind + 2 < len(dl_asc_keys)):
-                #     max_profit_helper(ind + 2, time + task_dur)
-                return prev_profit + task_profit
+    # iglooList format [id, deadline, duration, profit] where id = list index
+    for i in range(1, num_tasks):
+        for t in range(0, max_deadline+1):
+            igloo_id = dl_asc_keys[i]
+            igloo_dl = iglooList[igloo_id][1]
+            igloo_dur = iglooList[igloo_id][2]
+            igloo_prof = iglooList[igloo_id][2]
+            latest_dl = min(t, iglooList[igloo_id][1]) - iglooList[igloo_id][2]
+            if (latest_dl < 0):
+                B[i][t] = B[i-1][t]
+            else:
+                B[i][t] = max(B[i-1][t], igloo_prof + B[i-1][latest_dl])
+
+    def print_opt(i, t):
+        if i == 0:
+            return
+        if B[i][t] == B[i-1][t]:
+            print_opt(i-1, t)
         else:
-            if (ind + 1 < len(dl_asc_keys)):
-                return max_profit_helper(ind + 1, time)
+            igloo_id = dl_asc_keys[i]
+            latest_dl = min(t, iglooList[igloo_id][1]) - iglooList[igloo_id][2]
+            print_opt(i-1, latest_dl)
+            print("schedule job", igloo_id, "at time", latest_dl)
+            soln.append(igloo_id)
 
-    def get_task_calc_profit(id, time): #return task with corresponding id and time and -1 if dne
-        for t in tdata_lst:
-            # print(t.id, id, t.time, time)
-            if (t.id == id and t.time == time):
-                return t.calc_profit
-        return -1
+    print_opt(num_tasks-1, max_deadline)
 
-    def set_task_calc_profit(id, time, calc_profit): #return task with corresponding id and time and -1 if dne
-        for t in tdata_lst:
-            # print(t.id, id, t.time, time)
-            if (t.id == id and t.time == time):
-                t.calc_profit = calc_profit
-        return -1
-
-    def get_task_dur(id, time): #return task dur with corresponding id and time and -1 if dne
-        for t in tdata_lst:
-            if t.id == id and t.time == time:
-                return t.dur
-        return -1
-
-    def get_task_dl(id, time): #return task dur with corresponding id and time and -1 if dne
-        for t in tdata_lst:
-            if t.id == id and t.time == time:
-                return t.dl
-        return -1
-
-    def get_task_profit(id, time): #return task dur with corresponding id and time and -1 if dne
-        for t in tdata_lst:
-            if t.id == id and t.time == time:
-                return t.profit
-        return -1
-
-    max_profit_helper(1, 0)
     return soln
+    # max_profit(1, 1440, dl_asc_keys, avgProfit)
+
+# def max_profit(i, t, dl_asc_keys, avg_prof_min): #igloo index, time t, lst where keys are ids associated w/deadlines in asc order
+#     #initalize an lst of taskdata items
+#     tdata_lst = []
+#     #placeholder task for task0
+#     tdata_lst.append(Taskdata(0, 0, 0, 0, 0))
+#     for task in tasks:
+#         for min in range(1440):
+#             tdata = Taskdata(task.get_task_id(), task.get_deadline(),
+#                              task.get_duration(), task.get_max_benefit(),
+#                              min) #initalize a taskdata object for each task associated with each minute
+#             tdata_lst.append(tdata)
+#         #tdata_lst[0].set_profit(10)
+#     soln = []
+#     def max_profit_helper(ind, time):
+#         id = dl_asc_keys[ind] #id of the igloo we want to process
+#         task_calc_profit = get_task_calc_profit(id, time)
+#         task_dur = get_task_dur(id, time)
+#         task_dl = get_task_dl(id, time)
+#         task_profit = get_task_profit(id, time)
+#         # print("dur is", task_dur)
+#         if task_calc_profit != 0: #memoized values are returned
+#             return task_calc_profit
+#         if (time + task_dur < task_dl):
+#             if (task_profit / task_dur >= 0.5 * avg_prof_min): #greedy takes any task whose prof/min is greater than avg scaled
+#                 soln.append(id)
+#                 # print(soln)
+#                 prev_profit = get_task_calc_profit(i - 1, time)
+#                 set_task_calc_profit(id, time + task_dur, prev_profit + task_profit)
+#                 if (ind + 1 < len(dl_asc_keys)):
+#                     max_profit_helper(ind + 1, time + task_dur)
+#                 # if (ind + 2 < len(dl_asc_keys)):
+#                 #     max_profit_helper(ind + 2, time + task_dur)
+#                 return prev_profit + task_profit
+#         else:
+#             if (ind + 1 < len(dl_asc_keys)):
+#                 return max_profit_helper(ind + 1, time)
+#
+#     def get_task_calc_profit(id, time): #return task with corresponding id and time and -1 if dne
+#         for t in tdata_lst:
+#             # print(t.id, id, t.time, time)
+#             if (t.id == id and t.time == time):
+#                 return t.calc_profit
+#         return -1
+#
+#     def set_task_calc_profit(id, time, calc_profit): #return task with corresponding id and time and -1 if dne
+#         for t in tdata_lst:
+#             # print(t.id, id, t.time, time)
+#             if (t.id == id and t.time == time):
+#                 t.calc_profit = calc_profit
+#         return -1
+#
+#     def get_task_dur(id, time): #return task dur with corresponding id and time and -1 if dne
+#         for t in tdata_lst:
+#             if t.id == id and t.time == time:
+#                 return t.dur
+#         return -1
+#
+#     def get_task_dl(id, time): #return task dur with corresponding id and time and -1 if dne
+#         for t in tdata_lst:
+#             if t.id == id and t.time == time:
+#                 return t.dl
+#         return -1
+#
+#     def get_task_profit(id, time): #return task dur with corresponding id and time and -1 if dne
+#         for t in tdata_lst:
+#             if t.id == id and t.time == time:
+#                 return t.profit
+#         return -1
+#
+#     max_profit_helper(1, 0)
+#     return soln
 
 
 
